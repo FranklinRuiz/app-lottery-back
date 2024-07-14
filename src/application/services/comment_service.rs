@@ -3,6 +3,7 @@ use std::sync::Arc;
 use chrono::{DateTime};
 use rand::prelude::SliceRandom;
 use rand::thread_rng;
+use regex::Regex;
 use crate::infrastructure::tiktok_api::TikTokApi;
 use crate::domain::entities::comment::{ApiResponse, TransformedApiResponse, TransformedComment, TransformedUser, TransformedThumb, LotteryResponse};
 use reqwest::Error;
@@ -16,13 +17,25 @@ impl CommentService {
         CommentService { api }
     }
 
-    pub async fn get_comments(&self, unique_id: &str) -> Result<TransformedApiResponse, Error> {
+    fn extract_video_id(url: &str) -> String {
+        let pattern = r"video/([^?]+)";
+        let re = Regex::new(pattern).unwrap();
+
+        if let Some(caps) = re.captures(url) {
+            return caps.get(1).map_or("video".to_string(), |m| m.as_str().to_string());
+        } else {
+            return "video".to_string();
+        }
+    }
+
+    pub async fn get_comments(&self, url: &str) -> Result<TransformedApiResponse, Error> {
         let mut cursor = 0;
         let mut all_comments = Vec::new();
         let mut id = HashSet::new();
+        let unique_id = Self::extract_video_id(url);
 
         loop {
-            let api_url = self.api.get_comments_url(unique_id, cursor);
+            let api_url = self.api.get_comments_url(&*unique_id, cursor);
             let api_response: ApiResponse = self.api.fetch_comments(&api_url).await?;
 
             if let Some(comments) = api_response.comments {

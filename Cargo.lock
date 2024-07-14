@@ -258,6 +258,7 @@ dependencies = [
  "actix-web",
  "chrono",
  "rand",
+ "regex",
  "reqwest",
  "serde",
  "serde_json",

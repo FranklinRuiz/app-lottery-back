@@ -1,11 +1,11 @@
-use actix_web::{get, web, HttpResponse, Responder, post};
+use actix_web::{web, HttpResponse, Responder, post};
 use std::sync::Arc;
 use serde::Deserialize;
 use crate::application::services::comment_service::CommentService;
 
 #[derive(Deserialize)]
-pub struct PathParams {
-    pub unique_id: String,
+pub struct CommentRequest {
+    pub url: String,
 }
 
 #[derive(Deserialize)]
@@ -14,13 +14,13 @@ pub struct LotteryRequest {
     pub num_winners: usize,
 }
 
-#[get("/comments/{unique_id}")]
+#[post("/comments")]
 pub async fn get_comments(
     service: web::Data<Arc<CommentService>>,
-    path: web::Path<PathParams>,
+    body: web::Json<CommentRequest>,
 ) -> impl Responder {
-    let unique_id = &path.unique_id;
-    match service.get_comments(unique_id).await {
+    let url = body.url.clone();
+    match service.get_comments(&*url).await {
         Ok(transformed_response) => HttpResponse::Ok().json(transformed_response),
         Err(e) => HttpResponse::InternalServerError().body(format!("Error fetching comments: {}", e)),
     }
