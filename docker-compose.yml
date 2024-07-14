@@ -1,7 +1,9 @@
 services:
-  bin:
+  lottery-backend:
+    container_name: lottery-backend
+    image: lottery-bin
     build:
-      context: .
+      context: ./
       dockerfile: Dockerfile
     ports:
       - "9080:9080"

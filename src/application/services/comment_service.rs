@@ -39,8 +39,14 @@ impl CommentService {
 
         all_comments.sort_by_key(|comment| -comment.create_time);
 
-        let transformed_comments: Vec<TransformedComment> = all_comments.into_iter().map(|comment| {
-            let datetime = DateTime::from_timestamp(comment.create_time, 0).unwrap().format("%d/%m/%Y");
+        let transformed_comments: Vec<TransformedComment> = all_comments
+            .into_iter()
+            .map(|comment| {
+
+            let datetime = DateTime::from_timestamp(comment.create_time, 0)
+                .unwrap()
+                .format("%d/%m/%Y");
+
             let formatted_date = datetime.to_string();
 
             TransformedComment {
@@ -68,7 +74,10 @@ impl CommentService {
 
         participants.shuffle(&mut rng);
 
-        let winners: Vec<String> = participants.into_iter().take(num_winners).collect();
+        let winners: Vec<String> = participants
+            .into_iter()
+            .take(num_winners)
+            .collect();
 
         Ok(LotteryResponse {
             winners,
