@@ -1,8 +1,10 @@
 use std::collections::HashSet;
 use std::sync::Arc;
 use chrono::{DateTime};
+use rand::prelude::SliceRandom;
+use rand::thread_rng;
 use crate::infrastructure::tiktok_api::TikTokApi;
-use crate::domain::entities::comment::{ApiResponse, TransformedApiResponse, TransformedComment, TransformedUser, TransformedThumb};
+use crate::domain::entities::comment::{ApiResponse, TransformedApiResponse, TransformedComment, TransformedUser, TransformedThumb, LotteryResponse};
 use reqwest::Error;
 
 pub struct CommentService {
@@ -15,7 +17,6 @@ impl CommentService {
     }
 
     pub async fn get_comments(&self, unique_id: &str) -> Result<TransformedApiResponse, Error> {
-
         let mut cursor = 0;
         let mut all_comments = Vec::new();
         let mut id = HashSet::new();
@@ -39,7 +40,6 @@ impl CommentService {
         all_comments.sort_by_key(|comment| -comment.create_time);
 
         let transformed_comments: Vec<TransformedComment> = all_comments.into_iter().map(|comment| {
-
             let datetime = DateTime::from_timestamp(comment.create_time, 0).unwrap().format("%d/%m/%Y");
             let formatted_date = datetime.to_string();
 
@@ -60,6 +60,18 @@ impl CommentService {
 
         Ok(TransformedApiResponse {
             comments: transformed_comments,
+        })
+    }
+
+    pub async fn get_lottery(&self, mut participants: Vec<String>, num_winners: usize) -> Result<LotteryResponse, Error> {
+        let mut rng = thread_rng();
+
+        participants.shuffle(&mut rng);
+
+        let winners: Vec<String> = participants.into_iter().take(num_winners).collect();
+
+        Ok(LotteryResponse {
+            winners,
         })
     }
 }

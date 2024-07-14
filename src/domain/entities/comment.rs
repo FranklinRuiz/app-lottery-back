@@ -55,3 +55,9 @@ pub struct TransformedThumb {
 pub struct TransformedApiResponse {
     pub comments: Vec<TransformedComment>,
 }
+
+//sorteo
+#[derive(Serialize, Debug)]
+pub struct LotteryResponse {
+    pub winners: Vec<String>,
+}
